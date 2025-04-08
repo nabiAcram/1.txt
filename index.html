@@ -1,129 +1,189 @@
-using System;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Net.Http;
-using System.Text;
-
-namespace GitHubTextEditor
-{
-    public partial class Form1 : Form
-    {
-        public Form1()
-        {
-            InitializeComponent();
-        }
-
-        private async void buttonLoad_ClickAsync(object sender, EventArgs e)
-        {
-            string fileUrl = "https://api.github.com/repos/nabiAcram/1.txt/contents/1.txt"; // تغییر به URL API
-            string fileContent = await LoadFileFromGitHub(fileUrl);
-            if (!string.IsNullOrEmpty(fileContent))
-            {
-                richTextBoxTxtEditor.Text = fileContent;
-            }
-        }
-
-        private async Task<string> LoadFileFromGitHub(string fileUrl)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "GitHubTextEditor");
-                HttpResponseMessage response = await client.GetAsync(fileUrl);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string jsonResponse = await response.Content.ReadAsStringAsync();
-
-                    // استخراج داده base64 از JSON
-                    var fileInfoJson = Newtonsoft.Json.Linq.JObject.Parse(jsonResponse);
-                    string base64Content = fileInfoJson["content"].ToString();
-
-                    // تبدیل از base64 به متن
-                    byte[] decodedBytes = Convert.FromBase64String(base64Content);
-                    string fileContent = Encoding.UTF8.GetString(decodedBytes);
-
-                    return fileContent;
-                }
-                else
-                {
-                    MessageBox.Show("Error loading file from GitHub");
-                    return string.Empty;
-                }
-            }
-        }
-
-        private async void buttonSave_ClickAsync(object sender, EventArgs e)
-        {
-            var result = MessageBox.Show("آیا می‌خواهید تغییرات را آپلود کنید؟", "تایید آپلود", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                string fileContent = richTextBoxTxtEditor.Text;
-                string token = "your-github-token"; // توکن گیت‌هاب خود را اینجا وارد کنید
-                string fileUrl = "https://api.github.com/repos/nabiAcram/1.txt/contents/1.txt"; // تغییر به URL API
-
-                bool success = await UploadFileToGitHub(fileUrl, fileContent, token);
-                if (success)
-                {
-                    MessageBox.Show("فایل با موفقیت ویرایش و آپلود شد");
-                }
-                else
-                {
-                    MessageBox.Show("Error uploading file to GitHub.");
-                }
-            }
-            if (result == DialogResult.No)
-            {
-                MessageBox.Show("ویرایش کنسل شد");
-            }
-        }
-
-        private async Task<bool> UploadFileToGitHub(string fileUrl, string fileContent, string token)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("Authorization", "token " + token);
-                client.DefaultRequestHeaders.Add("User-Agent", "GitHubTextEditor");
-
-                HttpResponseMessage response = await client.GetAsync(fileUrl);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorMessage = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show("Error fetching file information: " + errorMessage);
-                    return false;
-                }
-
-                string fileInfo = await response.Content.ReadAsStringAsync();
-                var fileInfoJson = Newtonsoft.Json.Linq.JObject.Parse(fileInfo);
-                string sha = fileInfoJson["sha"].ToString();
-
-                // تبدیل محتوا به بایت با UTF-8 بدون BOM
-                var utf8WithoutBOM = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-                byte[] encodedBytes = utf8WithoutBOM.GetBytes(fileContent);
-                string base64Content = Convert.ToBase64String(encodedBytes);
-
-                var body = new
-                {
-                    message = "Save as UTF-8 without BOM",
-                    content = base64Content,
-                    sha = sha
-                };
-
-                string jsonBody = Newtonsoft.Json.JsonConvert.SerializeObject(body);
-                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-
-                response = await client.PutAsync(fileUrl, content);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorMessage = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show("Error uploading file to GitHub: " + errorMessage);
-                    return false;
-                }
-
-                return true;
-            }
-        }
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>برنامه نوبت پزشکان</title>
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f3f3f3;
+      text-align: center;
+      direction: rtl;
     }
-}
+
+    header, footer {
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: #e0f7fa;
+    }
+
+    .container {
+      padding: 10px;
+    }
+
+    .schedule {
+      display: none;
+      width: 100%;
+      max-width: 95%;
+      margin: auto;
+      table-layout: fixed;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      height: 50px;
+      vertical-align: top;
+      font-size: 18px;
+    }
+
+    th {
+      background-color: #b2ebf2;
+    }
+
+    .visible {
+      display: table;
+      animation: fadeIn 1s;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap');
+  </style>
+</head>
+<body>
+  <header id="shift-title">در حال بارگذاری فایل‌ها...</header>
+
+  <div class="container">
+    <table id="morning" class="schedule"></table>
+    <table id="evening" class="schedule"></table>
+  </div>
+
+  <footer id="random-quote">جمله‌ای نمایش داده نمی‌شود</footer>
+
+  <script>
+    const days = ["شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
+
+    let morningData = Array(7).fill().map(() => []);
+    let eveningData = Array(7).fill().map(() => []);
+    let quotes = [];
+    let isMorning = true;
+
+    // آدرس API گیت‌هاب
+    const shiftFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/1.txt';
+    const quoteFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/2.txt';
+
+    function createTable(data, tableId) {
+      const table = document.getElementById(tableId);
+      table.innerHTML = "";
+
+      const thead = document.createElement("thead");
+      const trHead = document.createElement("tr");
+      days.forEach(day => {
+        const th = document.createElement("th");
+        th.textContent = day;
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      for (let i = 0; i < 6; i++) {
+        const tr = document.createElement("tr");
+        for (let d = 0; d < 7; d++) {
+          const td = document.createElement("td");
+          td.textContent = data[d][i] || "";
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+    }
+
+    function handleShiftFile(content) {
+      morningData = Array(7).fill().map(() => []);
+      eveningData = Array(7).fill().map(() => []);
+
+      const lines = content.trim().split(/\r?\n/);
+
+      lines.forEach(line => {
+        const [name, dayStr, shiftStr] = line.split(",");
+        const day = parseInt(dayStr) - 1;
+        const shift = parseInt(shiftStr);
+
+        if (day >= 0 && day < 7) {
+          if (shift === 1) {
+            morningData[day].push(name);
+          } else if (shift === 2) {
+            eveningData[day].push(name);
+          }
+        }
+      });
+
+      createTable(morningData, "morning");
+      createTable(eveningData, "evening");
+
+      // اگر quotes هم آماده بود، نمایش رو شروع کن
+      if (quotes.length > 0) {
+        changeTable();
+      }
+    }
+
+    function handleQuoteFile(content) {
+      quotes = content.trim().split(/\r?\n/);
+      if (morningData.flat().length > 0 || eveningData.flat().length > 0) {
+        changeTable();
+      }
+    }
+
+    function changeTable() {
+      const morning = document.getElementById("morning");
+      const evening = document.getElementById("evening");
+      const title = document.getElementById("shift-title");
+      const quote = document.getElementById("random-quote");
+
+      setInterval(() => {
+        morning.classList.toggle("visible", isMorning);
+        evening.classList.toggle("visible", !isMorning);
+        title.textContent = isMorning ? "پزشکان نوبت صبح" : "پزشکان نوبت عصر";
+
+        if (quotes.length > 0) {
+          const random = quotes[Math.floor(Math.random() * quotes.length)];
+          quote.textContent = random;
+        }
+
+        isMorning = !isMorning;
+      }, 5000);
+    }
+
+    // تابع برای دریافت و تبدیل محتویات از گیت‌هاب
+    function fetchFileContent(url, callback) {
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const base64Content = data.content;
+          const decodedContent = atob(base64Content); // تبدیل از Base64 به متن
+          const utf8Content = decodeURIComponent(escape(decodedContent));
+          callback(utf8Content);
+        })
+        .catch(error => {
+          console.error('Error fetching file:', error);
+          document.getElementById('shift-title').textContent = 'خطا در بارگذاری فایل‌ها';
+        });
+    }
+
+    // دریافت و پردازش فایل‌ها
+    fetchFileContent(shiftFileUrl, handleShiftFile);
+    fetchFileContent(quoteFileUrl, handleQuoteFile);
+  </script>
+</body>
+</html>
