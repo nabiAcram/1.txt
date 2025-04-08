@@ -78,6 +78,12 @@
     let quotes = [];
     let isMorning = true;
 
+  const githubToken = "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";
+  const headers = {
+    "Authorization": "token " + githubToken,
+    "Accept": "application/vnd.github.v3.raw"
+  };
+
     // آدرس API گیت‌هاب
     const shiftFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/1.txt';
     const quoteFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/2.txt';
