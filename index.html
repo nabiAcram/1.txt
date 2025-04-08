@@ -11,6 +11,9 @@
       background: #f3f3f3;
       text-align: center;
       direction: rtl;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     header, footer {
@@ -21,19 +24,23 @@
     }
 
     .container {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
       padding: 10px;
+      overflow-y: auto;
     }
 
     .schedule {
       display: none;
-      width: 100%;
-      max-width: 95%;
-      height: 50%;
+      width: 48%;
+      height: calc(100vh - 400px); /* 200px بالا و 200px پایین برای فضای جملات */
       margin: auto;
       table-layout: fixed;
       border-collapse: collapse;
       background-color: white;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow-y: scroll;
     }
 
     th, td {
@@ -72,14 +79,13 @@
   <footer id="random-quote">جمله‌ای نمایش داده نمی‌شود</footer>
 
   <script>
-    const days = ["شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
+    const days = ["شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه"];
 
-    let morningData = Array(7).fill().map(() => []);
-    let eveningData = Array(7).fill().map(() => []);
+    let morningData = Array(6).fill().map(() => []);
+    let eveningData = Array(6).fill().map(() => []);
     let quotes = [];
     let isMorning = true;
 
-    // آدرس API گیت‌هاب
     const shiftFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/1.txt';
     const quoteFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/2.txt';
 
@@ -100,7 +106,7 @@
       const tbody = document.createElement("tbody");
       for (let i = 0; i < 6; i++) {
         const tr = document.createElement("tr");
-        for (let d = 0; d < 7; d++) {
+        for (let d = 0; d < 6; d++) {
           const td = document.createElement("td");
           td.textContent = data[d][i] || "";
           tr.appendChild(td);
@@ -133,7 +139,6 @@
       createTable(morningData, "morning");
       createTable(eveningData, "evening");
 
-      // اگر quotes هم آماده بود، نمایش رو شروع کن
       if (quotes.length > 0) {
         changeTable();
       }
@@ -166,13 +171,12 @@
       }, 5000);
     }
 
-    // تابع برای دریافت و تبدیل محتویات از گیت‌هاب
     function fetchFileContent(url, callback) {
       fetch(url)
         .then(response => response.json())
         .then(data => {
           const base64Content = data.content;
-          const decodedContent = atob(base64Content); // تبدیل از Base64 به متن
+          const decodedContent = atob(base64Content);
           const utf8Content = decodeURIComponent(escape(decodedContent));
           callback(utf8Content);
         })
@@ -182,7 +186,6 @@
         });
     }
 
-    // دریافت و پردازش فایل‌ها
     fetchFileContent(shiftFileUrl, handleShiftFile);
     fetchFileContent(quoteFileUrl, handleQuoteFile);
   </script>
