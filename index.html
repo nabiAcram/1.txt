@@ -3,63 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <title>برنامه نوبت پزشکان</title>
-  <style>
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f3f3f3;
-      text-align: center;
-      direction: rtl;
-    }
+ <style>
+@font-face {
+  font-family: 'BTitr';
+  src: url('B Titr.TTF') format('truetype');
+}
 
-    header, footer {
-      padding: 20px;
-      font-size: 24px;
-      font-weight: bold;
-      background-color: #e0f7fa;
-    }
+@font-face {
+  font-family: 'BNazanin';
+  src: url('B Nazanin.TTF') format('truetype');
+}
+  body {
+    font-family: 'sans-serif';
+    margin: 0;
+    padding: 0;
+    background: #f3f3f3;
+    text-align: center;
+    direction: rtl;
+  }
 
-    .container {
-      padding: 10px;
-    }
+  header, footer {
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #e0f7fa;
+    font-family: 'BNazanin', sans-serif;
+  }
 
-    .schedule {
-      display: none;
-      width: 100%;
-      max-width: 95%;
-      margin: auto;
-      table-layout: fixed;
-      border-collapse: collapse;
-      background-color: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
+  .container {
+    padding: 10px;
+  }
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      height: 40px;
-      vertical-align: middle;
-      text-align: center;   
-      font-size: 18px;
-    }
+  .schedule {
+    display: none;
+    width: 100%;
+    max-width: 95%;
+    margin: auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);   
+  }
 
-    th {
-      background-color: #b2ebf2;
-    }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    height: 47px;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'BTitr', sans-serif;
+  }
 
-    .visible {
-      display: table;
-      animation: fadeIn 1s;
-    }
+  th {
+    background-color: #b2ebf2;
+  }
 
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
-    }
+  .visible {
+    display: table;
+    animation: fadeIn 1s;
+  }
 
-    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap');
-  </style>
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+</style>
 </head>
 <body>
   <header id="shift-title">در حال بارگذاری فایل‌ها...</header>
