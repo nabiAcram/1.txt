@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>برنامه نوبت دندان پزشکان</title>
+  <style>
+    @font-face {
+      font-family: 'BTitr';
+      src: url('B Titr.TTF') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'BNazanin';
+      src: url('B Nazanin.TTF') format('truetype');
+    }
+
+    body {
+      font-family: 'sans-serif';
+      margin: 0;
+      padding: 0;
+      background: #f3f3f3;
+      text-align: center;
+      direction: rtl;
+    }
+
+    header, footer {
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: #e0f7fa;
+      font-family: 'BNazanin', sans-serif;
+    }
+
+    .container {
+      padding: 10px;
+    }
+
+    .schedule {
+      display: none;
+      width: 100%;
+      max-width: 95%;
+      margin: auto;
+      table-layout: fixed;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);   
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      height: 65px;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 18px;
+      font-family: 'BTitr', sans-serif;
+    }
+
+    th {
+      background-color: #b2ebf2;
+    }
+
+    .visible {
+      display: table;
+      animation: fadeIn 1s;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+  <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
+    <button onclick="goFullscreen()" style="display: block; margin-bottom: 10px; font-family: 'BNazanin'; background-color: #0288D1; color: white; border: none; border-radius: 8px; padding: 6px 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+      نمایش تمام‌صفحه
+    </button>
+    <button onclick="location.reload()" style="display: block; margin-bottom:  10px; font-family: 'BNazanin'; background-color: #0288D1; color: white; border: none; border-radius: 8px; padding: 6px 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+      به روز رسانی
+    </button>
+  </div>
+
+  <header id="shift-title">در حال بارگذاری فایل‌ها...</header>
+
+  <div class="container">
+    <table id="morning-general" class="schedule"></table>
+    <table id="evening-general" class="schedule"></table>
+    <table id="morning-specialized" class="schedule"></table>
+    <table id="evening-specialized" class="schedule"></table>
+  </div>
+
+  <footer id="random-quote">جمله‌ای نمایش داده نمی‌شود</footer>
+
+  <script>
+    const days = ["شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
+
+    let morningGeneralData = Array(7).fill().map(() => []);
+    let eveningGeneralData = Array(7).fill().map(() => []);
+    let morningSpecializedData = Array(7).fill().map(() => []);
+    let eveningSpecializedData = Array(7).fill().map(() => []);
+    let quotes = [];
+    let tableIndex = 0;
+
+    const githubToken = "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";
+    const headers = {
+      "Authorization": "token " + githubToken,
+      "Accept": "application/vnd.github.v3.raw"
+    };
+
+    const shiftFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/3.txt';
+    const quoteFileUrl = 'https://api.github.com/repos/nabiAcram/1.txt/contents/4.txt';
+
+    function createTable(data, tableId) {
+      const table = document.getElementById(tableId);
+      table.innerHTML = "";
+
+      const thead = document.createElement("thead");
+      const trHead = document.createElement("tr");
+      days.forEach(day => {
+        const th = document.createElement("th");
+        th.textContent = day;
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      for (let i = 0; i < 6; i++) {
+        const tr = document.createElement("tr");
+        for (let d = 0; d < 7; d++) {
+          const td = document.createElement("td");
+          td.textContent = data[d][i] || "";
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+    }
+
+    function handleShiftFile(content) {
+      morningGeneralData = Array(7).fill().map(() => []);
+      eveningGeneralData = Array(7).fill().map(() => []);
+      morningSpecializedData = Array(7).fill().map(() => []);
+      eveningSpecializedData = Array(7).fill().map(() => []);
+
+      const lines = content.trim().split(/\r?\n/);
+
+      lines.forEach(line => {
+        const [name, dayStr, shiftStr, typeStr] = line.split(",");
+        const day = parseInt(dayStr) - 1;
+        const shift = parseInt(shiftStr);
+        const type = parseInt(typeStr);
+
+        if (day >= 0 && day < 7) {
+          if (type === 1) {
+            if (shift === 1) {
+              morningGeneralData[day].push(name);
+            } else if (shift === 2) {
+              eveningGeneralData[day].push(name);
+            }
+          } else if (type === 2) {
+            if (shift === 1) {
+              morningSpecializedData[day].push(name);
+            } else if (shift === 2) {
+              eveningSpecializedData[day].push(name);
+            }
+          }
+        }
+      });
+
+      createTable(morningGeneralData, "morning-general");
+      createTable(eveningGeneralData, "evening-general");
+      createTable(morningSpecializedData, "morning-specialized");
+      createTable(eveningSpecializedData, "evening-specialized");
+
+      if (quotes.length > 0) {
+        changeTable();
+      }
+    }
+
+    function handleQuoteFile(content) {
+      quotes = content.trim().split(/\r?\n/);
+      if (morningGeneralData.flat().length > 0 || eveningGeneralData.flat().length > 0) {
+        changeTable();
+      }
+    }
+
+    function changeTable() {
+      const title = document.getElementById("shift-title");
+      const quote = document.getElementById("random-quote");
+
+      setInterval(() => {
+        document.querySelectorAll('.schedule').forEach((table, index) => {
+          table.classList.toggle("visible", index === tableIndex);
+        });
+
+        switch (tableIndex) {
+          case 0:
+            title.textContent = "لیست پزشکان عمومی درمانگاه نبی اکرم (ص) نوبت صبح";
+            break;
+          case 1:
+            title.textContent = "لیست پزشکان عمومی درمانگاه نبی اکرم (ص) نوبت عصر";
+            break;
+          case 2:
+            title.textContent = "لیست پزشکان تخصصی درمانگاه نبی اکرم (ص) نوبت صبح";
+            break;
+          case 3:
+            title.textContent = "لیست پزشکان تخصصی درمانگاه نبی اکرم (ص) نوبت عصر";
+            break;
+        }
+
+        if (quotes.length > 0) {
+          const random = quotes[Math.floor(Math.random() * quotes.length)];
+          quote.textContent = random;
+        }
+
+        tableIndex = (tableIndex + 1) % 4;
+      }, 10000);
+    }
+
+    function fetchFileContent(url, callback) {
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const base64Content = data.content;
+          const decodedContent = atob(base64Content); 
+          const utf8Content = decodeURIComponent(escape(decodedContent));
+          callback(utf8Content);
+        })
+        .catch(error => {
+          console.error('Error fetching file:', error);
+          document.getElementById('shift-title').textContent = 'خطا در بارگذاری فایل‌ها';
+        });
+    }
+
+    function goFullscreen() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    }
+
+    fetchFileContent(shiftFileUrl, handleShiftFile);
+    fetchFileContent(quoteFileUrl, handleQuoteFile);
+  </script>
+</body>
+</html>
