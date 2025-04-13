@@ -130,7 +130,7 @@
         const tr = document.createElement("tr");
         for (let d = 0; d < 7; d++) {
           const td = document.createElement("td");
-          td.textContent = data[d][i] || "";
+          td.innerHTML = data[d][i] || "";
           tr.appendChild(td);
         }
         tbody.appendChild(tr);
@@ -151,9 +151,10 @@
         const day = parseInt(dayStr) - 1;
         const shift = parseInt(shiftStr);
         const type = parseInt(typeStr);    
-        let displayName = name.replace(" - ", "<br>");
+    
 
         if (day >= 0 && day < 7) {
+          let displayName = name.replace(" - ", "<br>");
           if (type === 1) {
             if (shift === 1) {
               morningGeneralData[day].push(displayName);
