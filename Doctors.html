@@ -152,18 +152,20 @@
         const shift = parseInt(shiftStr);
         const type = parseInt(typeStr);
 
+         let displayName = name.replace("<br>", "<br>");
+
         if (day >= 0 && day < 7) {
           if (type === 1) {
             if (shift === 1) {
-              morningGeneralData[day].push(name);
+              morningGeneralData[day].push(displayName);
             } else if (shift === 2) {
-              eveningGeneralData[day].push(name);
+              eveningGeneralData[day].push(displayName);
             }
           } else if (type === 2) {
             if (shift === 1) {
-              morningSpecializedData[day].push(name);
+              morningSpecializedData[day].push(displayName);
             } else if (shift === 2) {
-              eveningSpecializedData[day].push(name);
+              eveningSpecializedData[day].push(displayName);
             }
           }
         }
