@@ -1,6 +1,12 @@
 
 <!DOCTYPE html>
 <html lang="fa">
+  const images = [
+  './1.jpg',
+  './2.jpg',
+  './3.jpg',
+  './4.jpg'
+];
 <head>
   <meta charset="UTF-8">
   <title>برنامه نوبت دندان پزشکان</title>
@@ -20,7 +26,7 @@
     padding: 0;
     background: #f3f3f3;
     text-align: center;
-    direction: rtl;
+    direction: rtl;    
   }
 
   header, footer {
@@ -78,7 +84,7 @@
     <button onclick="location.reload()" style="display: block; margin-bottom:  10px; font-family: 'BNazanin'; background-color: #0288D1; color: white; border: none; border-radius: 8px; padding: 6px 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
       به روز رسانی
     </button>
-  </div>
+  </div>  
 <body>
   <header id="shift-title">در حال بارگذاری فایل‌ها...</header>
 
@@ -86,6 +92,10 @@
     <table id="morning" class="schedule"></table>
     <table id="evening" class="schedule"></table>
   </div>
+
+  <div id="image-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 9999; justify-content: center; align-items: center;">
+  <img id="overlay-img" src="" style="max-width: 90%; max-height: 90%;">
+   </div>
 
   <footer id="random-quote">جمله‌ای نمایش داده نمی‌شود</footer>
 
@@ -170,25 +180,41 @@
       }
     }
 
-    function changeTable() {
-      const morning = document.getElementById("morning");
-      const evening = document.getElementById("evening");
-      const title = document.getElementById("shift-title");
-      const quote = document.getElementById("random-quote");
+   function changeTable() {
+  const morning = document.getElementById("morning");
+  const evening = document.getElementById("evening");
+  const title = document.getElementById("shift-title");
+  const quote = document.getElementById("random-quote");
+  const imageOverlay = document.getElementById("image-overlay");
+  const overlayImg = document.getElementById("overlay-img");
 
-      setInterval(() => {
-        morning.classList.toggle("visible", isMorning);
-        evening.classList.toggle("visible", !isMorning);
-        title.textContent = isMorning ? "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت صبح" : "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت عصر";
+  function toggleTables() {
+    // نمایش تصویر رندوم برای 10 ثانیه
+    const randomImage = images[Math.floor(Math.random() * images.length)];
+    overlayImg.src = randomImage;
+    imageOverlay.style.display = "flex";
 
-        if (quotes.length > 0) {
-          const random = quotes[Math.floor(Math.random() * quotes.length)];
-          quote.textContent = random;
-        }
+    setTimeout(() => {
+      imageOverlay.style.display = "none";
 
-        isMorning = !isMorning;
-      }, 30000);
-    }
+      // تعویض جدول پس از نمایش تصویر
+      morning.classList.toggle("visible", isMorning);
+      evening.classList.toggle("visible", !isMorning);
+      title.textContent = isMorning ? "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت صبح" : "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت عصر";
+
+      if (quotes.length > 0) {
+        const random = quotes[Math.floor(Math.random() * quotes.length)];
+        quote.textContent = random;
+      }
+
+      isMorning = !isMorning;
+    }, 10000); // 10 ثانیه
+  }
+
+  toggleTables();
+  setInterval(toggleTables, 30000);
+}
+
 
     // تابع برای دریافت و تبدیل محتویات از گیت‌هاب
     function fetchFileContent(url, callback) {
