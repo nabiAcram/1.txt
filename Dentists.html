@@ -218,6 +218,8 @@
 
     if (step === 0 || step === 2) {
       // نمایش تصویر رندوم
+      morning.classList.remove("visible");
+      evening.classList.remove("visible");
       const randomImage = images[Math.floor(Math.random() * images.length)];
       overlayImg.src = randomImage;
       imageOverlay.style.display = "flex";
