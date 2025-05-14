@@ -179,7 +179,7 @@
       }
     }
 
-   function changeTable() {
+  function changeTable() {
   const morning = document.getElementById("morning");
   const evening = document.getElementById("evening");
   const title = document.getElementById("shift-title");
@@ -187,32 +187,48 @@
   const imageOverlay = document.getElementById("image-overlay");
   const overlayImg = document.getElementById("overlay-img");
 
-  function toggleTables() {
-    // نمایش تصویر رندوم برای 10 ثانیه
-    const randomImage = images[Math.floor(Math.random() * images.length)];
-    overlayImg.src = randomImage;
-    imageOverlay.style.display = "flex";
+  let step = 0; // حالت فعلی در چرخه: 0=عکس، 1=morning، 2=عکس، 3=evening
 
-    setTimeout(() => {
-      imageOverlay.style.display = "none";
+  function updateCycle() {
+    // پنهان کردن همه چیز
+    morning.classList.remove("visible");
+    evening.classList.remove("visible");
+    imageOverlay.style.display = "none";
 
-      // تعویض جدول پس از نمایش تصویر
-      morning.classList.toggle("visible", isMorning);
-      evening.classList.toggle("visible", !isMorning);
-      title.textContent = isMorning ? "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت صبح" : "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت عصر";
+    if (step === 0 || step === 2) {
+      // نمایش تصویر رندوم
+      const randomImage = images[Math.floor(Math.random() * images.length)];
+      overlayImg.src = randomImage;
+      imageOverlay.style.display = "flex";
+
+    } else if (step === 1) {
+      // نمایش morning
+      morning.classList.add("visible");
+      title.textContent = "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت صبح";
 
       if (quotes.length > 0) {
         const random = quotes[Math.floor(Math.random() * quotes.length)];
         quote.textContent = random;
       }
 
-      isMorning = !isMorning;
-    }, 5000); // 10 ثانیه
+    } else if (step === 3) {
+      // نمایش evening
+      evening.classList.add("visible");
+      title.textContent = "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت عصر";
+
+      if (quotes.length > 0) {
+        const random = quotes[Math.floor(Math.random() * quotes.length)];
+        quote.textContent = random;
+      }
+    }
+
+    step = (step + 1) % 4; // چرخش بین 0 تا 3
   }
 
-  toggleTables();
-  setInterval(toggleTables, 5000);
+  updateCycle(); // اجرای اولیه
+  setInterval(updateCycle, 10000); // هر 10 ثانیه تکرار شود
 }
+
 
 
     // تابع برای دریافت و تبدیل محتویات از گیت‌هاب
