@@ -226,7 +226,7 @@
     evening.classList.remove("visible");
     imageOverlay.style.display = "none";
 
-    if (step === 0 || step === 2) {
+    if (step === 3 || step === 4) {
       // نمایش تصویر رندوم
       morning.classList.remove("visible");
       evening.classList.remove("visible");
@@ -234,7 +234,7 @@
       overlayImg.src = randomImage;
       imageOverlay.style.display = "flex";
 
-    } else if (step === 1) {
+    } else if (step === 0) {
       // نمایش morning
       morning.classList.add("visible");
       title.textContent = "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت صبح";
@@ -244,7 +244,7 @@
         quote.textContent = random;
       }
 
-    } else if (step === 3) {
+    } else if (step === 2) {
       // نمایش evening
       evening.classList.add("visible");
       title.textContent = "فهرست دندان پزشکان درمانگاه نبی اکرم (ص) نوبت عصر";
